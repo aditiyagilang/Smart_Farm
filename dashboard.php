@@ -1,38 +1,35 @@
 <?php
 require('auth.php');
 require('koneksi.php');
-$tanggalnow = date('Y-m-d');
 
-$query5 =  mysqli_query($koneksi, "SELECT * from sesi_tanam where status='belum'");
-if (mysqli_num_rows($query5) > 0) {
-	while ($data2 = mysqli_fetch_array($query5)) {
-		$tanggalsesi = $data2["tgl_selesai"];
-		if ($tanggalsesi >= $tanggalnow) {
-?>
-			<script>
-				swal({
-					title: 'Good job!',
-					text: 'You clicked the button!',
-					type: 'success',
-					showCancelButton: true,
-					confirmButtonClass: 'btn btn-success',
-					cancelButtonClass: 'btn btn-danger'
-				})
-			</script>
+$apiKey = "a4e873808077c72854f9549953b758af";
+$cityId = "1643084"; // Jakarta city Code
 
-<?php
-		}
-	}
+function getWeatherData($apiKey, $cityId)
+{
+	$weatherServer = "http://api.openweathermap.org";
+	$apiPath = "/data/2.5/weather";
+	$url = "{$weatherServer}{$apiPath}?id={$cityId}&appid={$apiKey}";
+
+	$curl = curl_init($url);
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	$response = curl_exec($curl);
+	curl_close($curl);
+
+	$weatherData = json_decode($response, true);
+
+	return $weatherData;
 }
 
+// Fetch weather data
+$weatherData = getWeatherData($apiKey, $cityId);
 ?>
 <!DOCTYPE html>
-<html>
+<html xmlns='http://www.w3.org/1999/xhtml'>
 
 <head>
-	<!-- Basic Page Info -->
-	<meta charset="utf-8" />
-	<title>Edifarm</title>
+<meta charset="utf-8" />
+	<title>Smart Farm</title>
 	<link rel="apple-touch-icon" sizes="180x180" href="vendors/images/logo_edifarm.png" />
 	<link rel="icon" type="image/png" sizes="32x32" href="vendors/images/logo_edifarm.png" />
 	<link rel="icon" type="image/png" sizes="16x16" href="vendors/images/logo_edifarm.png" />
@@ -41,7 +38,8 @@ if (mysqli_num_rows($query5) > 0) {
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 
 	<!-- Google Font -->
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+		rel="stylesheet" />
 	<!-- CSS -->
 	<link rel="stylesheet" type="text/css" href="vendors/styles/core.css" />
 	<link rel="stylesheet" type="text/css" href="vendors/styles/icon-font.min.css" />
@@ -49,7 +47,9 @@ if (mysqli_num_rows($query5) > 0) {
 	<link rel="stylesheet" type="text/css" href="src/plugins/datatables/css/responsive.bootstrap4.min.css" />
 	<link rel="stylesheet" type="text/css" href="vendors/styles/style.css" />
 
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+		integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+		crossorigin="" />
 	<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
 	<style type="text/css">
@@ -91,110 +91,111 @@ if (mysqli_num_rows($query5) > 0) {
 			padding: .5rem;
 			border: 1px solid #ddd !important;
 		}
+		
 	</style>
 </head>
+
 <body>
+<?php include 'header.php'; ?>
+		
+		<div class="right-sidebar">
+		<?php include 'rightbar.php'; ?>
+		</div>
 
-    <?php include 'header.php'; ?>
+		<?php include 'sidebar.php'; ?>
+		<div class="mobile-menu-overlay"></div>
+	<script>
+		var firebaseConfig = {
+			apiKey: "AIzaSyDp_uLCSrlxJEn9EWbFYm_kY8lLbMuT3Q4",
+			authDomain: "knupolije1.firebaseapp.com",
+			databaseURL: "https://knupolije1-default-rtdb.firebaseio.com",
+			projectId: "knupolije1",
+			storageBucket: "knupolije1.appspot.com",
+			messagingSenderId: "668839492490",
+			appId: "1:668839492490:web:f8da0717cf185992762673",
+			measurementId: "G-2DXHZL4HQH"
+		};
+		if (!firebase.apps.length) {
+			firebase.initializeApp(firebaseConfig);
+		}
 
-    <div class="right-sidebar">
-        <?php include 'rightbar.php'; ?>
-    </div>
 
-    <?php include 'sidebar.php'; ?>
-    <div class="mobile-menu-overlay"></div>
+		// Definisi fungsi-fungsi
+		function handleSuccess(snapshot) {
+			const data = snapshot.val();
+			if (data) {
+				const latestEntryKey = Object.keys(data).pop();
+				const latestEntry = data[latestEntryKey];
 
-    <div class="main-container">
+				if (latestEntry.soilHumidity1) {
+					const soilHumidity1Data = latestEntry.soilHumidity1.slice();
+					updateDataText("data-text-1", soilHumidity1Data);
+				}
+				if (latestEntry.soilHumidity2) {
+					const soilHumidity2Data = latestEntry.soilHumidity2.slice();
+					updateDataText("data-text-2", soilHumidity2Data);
+				}
+			}
+		}
 
-        <div class="xs-pd-20-10 pd-ltr-20">
-            <div class="title pb-20">
-                <h2 class="h3 mb-0">Dashboard</h2>
+		function updateDataText(elementId, dataArray) {
+			const element = document.getElementById(elementId);
+			element.textContent = JSON.stringify(dataArray);
+		}
+
+		function handleError(error) {
+			console.error(error);
+		}
+		// Mendaftarkan listener untuk pembaruan data
+		const dataRef = database.ref('/data');
+		dataRef.on('value', handleSuccess, handleError);
+	</script>
+	<div class="main-container">
+    <div class="xs-pd-20-10 pd-ltr-20">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="title pb-20">
+                    <h2 class="h2 mt-0">Dashboard</h2>
+                </div>
             </div>
-            <div class="row">
-                <div class="col-md-6">
+            <div class="col-md-6">
+                <p style="text-align: right">
+                    <?php
+                    if ($weatherData) {
+                        $kelvinTemp = $weatherData['main']['temp'];
+                        $celsiusTemp = $kelvinTemp - 273.15;
+                        echo "Temperature: " . round($celsiusTemp, 2) . " &#8451;<br>";
 
-                    <div class="card card-primary card-outline">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="far fa-chart-bar"></i>
-                                Line Chart 1
-                            </h3>
-                            <!-- Add your card header buttons here -->
-                        </div>
-                        <div class="card-body">
-                            <div id="line-chart-1" style="height: 500px;"></div>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="col-md-6">
-
-                    <div class="card card-primary card-outline">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="far fa-chart-bar"></i>
-                                Line Chart 2
-                            </h3>
-                            <!-- Add your card header buttons here -->
-                        </div>
-                        <div class="card-body">
-                            <div id="line-chart-2" style="height: 500px;"></div>
-                        </div>
-                    </div>
-
-                </div>
+                        echo "Weather: " . $weatherData['weather'][0]['description'] . "<br>";
+                        echo "Wind Speed: " . $weatherData['wind']['speed'] . " m/s";
+                    } else {
+                        echo "Failed to fetch weather data.";
+                    }
+                    ?>
+                </p>
             </div>
         </div>
-
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.tooltip.min.js"></script>
-
-    <script>
-        $(function () {
-            // Example data generation for Line Chart 1
-            var sin1 = [];
-            for (var i = 0; i <= 14; i += 0.5) {
-                sin1.push([i, Math.sin(i)]);
-            }
-            var line_data1 = {
-                data: sin1,
-                label: "Sin 1",
-                color: '#3c8dbc'
-            };
-            
-            // Example data generation for Line Chart 2
-            var cos2 = [];
-            for (var i = 0; i <= 14; i += 0.5) {
-                cos2.push([i, Math.cos(i)]);
-            }
-            var line_data2 = {
-                data: cos2,
-                label: "Cos 2",
-                color: '#00c0ef'
-            };
-
-            var plotOptions = {
-                // Your plot options here
-            };
-
-            // Initialize Line Chart 1
-            var $chart1 = $('#line-chart-1');
-            $.plot($chart1, [line_data1], plotOptions);
-
-            // Initialize Line Chart 2
-            var $chart2 = $('#line-chart-2');
-            $.plot($chart2, [line_data2], plotOptions);
-
-            // Rest of your chart setup and interaction logic
-        });
-    </script>
-
-    <!-- Include other JavaScript files as needed -->
-
+	<div class="main-container">
+		<div class="xs-pd-20-10 pd-ltr-20">
+			<div class="row">
+				<div class="col-md-6">
+					<div class="card card-primary card-outline">
+						<div class="card-body">
+							<div id="data-text-1"></div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="card card-primary card-outline">
+						<div class="card-body">
+							<div id="data-text-2"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </body>
-
 
 </html>
