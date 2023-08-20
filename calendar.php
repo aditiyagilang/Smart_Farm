@@ -63,11 +63,11 @@ if(isset($_POST['tambah'])) {
 }
 if(isset($_POST['Update'])) {
 	$id2 = $_POST['idJadwal'];
-	$user = $_POST['user'];
+
 	$activities = $_POST['title'];
 	$start = $_POST['start'];
 	$end = $_POST['end'];
-	$query9 =  "UPDATE schedule set activities = '$activities', date_start= '$start', date_finish = '$end', id_user = '$user' WHERE `schedule`.`id_schedule` = '$id2'";
+	$query9 =  "UPDATE schedule set activities = '$activities', date_start= '$start', date_finish = '$end' WHERE `schedule`.`id_schedule` = $id2";
 	$result = mysqli_query($koneksi,$query9);
 }
 //hapus jadwal
@@ -112,7 +112,7 @@ if ($idPilihan){
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>Edifarm</title>
+		<title>Calendar</title>
 		<link rel="apple-touch-icon" sizes="180x180" href="vendors/images/SmartFarm-LOGO 1.png" />
 		<link rel="icon" type="image/png" sizes="32x32" href="vendors/images/SmartFarm-LOGO 1.png" />
 		<link rel="icon" type="image/png" sizes="16x16" href="vendors/images/SmartFarm-LOGO 1.png" />
@@ -213,9 +213,12 @@ if ($idPilihan){
 								<div class="modal-content">
 									<form action="calendar.php?idlhn=<?=$idPilihan;?>" method="POST">
 										<div class="modal-body">
-											<h4 class="text-blue h4 mb-10">Detail Jadwal</h4>
+											<h4 class="text-blue h4 mb-10">Detail Schedule</h4>
 										
-											
+											<div class="form-group">
+												
+												<input type="hidden" class="idJadwal form-control" name="idJadwal" id="user" />
+											</div>
 											<div class="form-group">
 												<label>activities</label>
 												<input type="text" class="title form-control" name="title" id="title" required/>
@@ -241,10 +244,10 @@ if ($idPilihan){
 												class="btn btn-primary"
 												data-dismiss="modal"
 											>
-												Batal
+												Cancel
 											</button>
 											<button type="submit" class="btn btn-primary"  id="tombol_form" name="hapus">
-												Hapus
+												Delete
 											</button>
 										</div>
 									</form>
@@ -261,7 +264,7 @@ if ($idPilihan){
 									<form action="calendar.php?idlhn=<?=$idPilihan;?>" method="POST">
 										<div class="modal-body">
 											<h4 class="text-blue h4 mb-10">Add New Schedule</h4>
-											
+											<input type="hidden" class="form-control" name="idJadwal" id="user" required/>
 											<div class="form-group">
 												<label>Activities</label>
 												<input type="text" class="form-control" name="activities" id="activities" required/>
@@ -312,7 +315,7 @@ if ($idPilihan){
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="exampleModalLabel">New Pot</h5>
+						<h5 class="modal-title" id="exampleModalLabel">New Schedule</h5>
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 						</button>
@@ -377,8 +380,8 @@ if ($idPilihan){
 							</div>
 							</div>
 								<div class="modal-footer">
-									<button type="button" class="btn btn-secondary" data-dismiss="modal" alt="add-modal-kar" >Batal</button>
-									<input type="submit" name="tambahJadwal" class="btn btn-primary" value="Simpan" id="sa-success">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal" alt="add-modal-kar" >Cancel</button>
+									<input type="submit" name="tambahJadwal" class="btn btn-primary" value="Save" id="sa-success">
 								</div>
 							</div>
 						</form>
@@ -455,7 +458,7 @@ if ($idPilihan){
 			select: function(start, end, allDay){
 				var lahan = "<?php echo $idPilihan ?>";
 				if(lahan==""){
-					alert("Choose a New Pot First on add Button!");
+					alert("Choose a New Schedule First on add Button!");
 				}else{
 					var start =$.fullCalendar.formatDate(start, "Y-MM-DD HH:mm:ss");
 				var end =$.fullCalendar.formatDate(end, "Y-MM-DD HH:mm:ss");
