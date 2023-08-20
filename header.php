@@ -106,6 +106,8 @@ require("koneksi.php");
 		}
 
 
+
+
 	</script>
 	<div class="header">
 		<div class="header-left">
@@ -136,6 +138,7 @@ require("koneksi.php");
 			ledOn = !ledOn;
 			ledToggle.textContent = ledOn ? 'OFF' : 'ON';
 			toggleLedStateInFirebase();
+		
 		});
 
 		motorToggle.addEventListener('click', () => {

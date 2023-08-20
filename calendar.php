@@ -1,6 +1,5 @@
 <?php 
 require('koneksi.php');
-require('auth.php');
 
 if(isset($_GET['idlhn'])){
 	$idPilihan = $_GET['idlhn'];
@@ -14,94 +13,98 @@ if(isset($_POST['tambahJadwal'])) {
 	$jenis = $_POST['padiPilih'];
 	$startTgl = $_POST['tanggalMulai'];
 	
-	$query0 = "SELECT durasi_tanam FROM jenis where id_jenis = '$jenis'";
-	$result2 = mysqli_query($koneksi,$query0);
-		$row = mysqli_fetch_assoc($result2);
-		$hst = $row["durasi_tanam"];
-		$endTgl = date('Y-m-d', strtotime("+$hst days", strtotime($startTgl)));
+
+		$endTgl = date('Y-m-d');
 		
-	$query =  "INSERT INTO `sesi_tanam` ( `tgl_mulai`, `tgl_selesai`, `id_jenis`, `status`, `id_lahan`) VALUES ( '$startTgl','$endTgl','$jenis', 'belum', '$lahan')";
-	$result = mysqli_query($koneksi,$query); 
+		$query =  "INSERT INTO `planting_session` (`date_start`, `date_finish`, `id_variety`, `id_pot`) VALUES ('$startTgl','$endTgl','$jenis', '$lahan')";
+		$result = mysqli_query($koneksi, $query);
 	
-	$query3 = "SELECT id_sesi FROM sesi_tanam ORDER BY id_sesi DESC";
-	$result3 = mysqli_query($koneksi,$query3);
-		$row1 = mysqli_fetch_assoc($result3);
-    	$idbaru = $row1["id_sesi"];
+		if ($result) { // Pastikan query INSERT berhasil sebelum melanjutkan
+			$query3 = "SELECT id_session FROM planting_session ORDER BY id_session DESC";
+			$result3 = mysqli_query($koneksi, $query3);
+			$row1 = mysqli_fetch_assoc($result3);
+			$idbaru = $row1["id_session"];
 	
-	$query4 = mysqli_query($koneksi,"SELECT * FROM kegiatan where id_jenis ='$jenis'");
-	if(mysqli_num_rows($query4)>0){ 
-		while($data = mysqli_fetch_array($query4)){
-			$kegiatan=$data["nama_kegiatan"];
+			$query4 = mysqli_query($koneksi, "SELECT * FROM activities where id_variety ='$jenis'");
+			if (mysqli_num_rows($query4) > 0) {
+				while ($data = mysqli_fetch_array($query4)) {
+			$activities =$data["activities"];
 			$hst1=$data["hst"];
 			$hst2=$hst1 - 1;
 			$tgl = date('Y-m-d', strtotime("+$hst2 days", strtotime($startTgl)));
 			$tgl2 = date('Y-m-d', strtotime('+1 days', strtotime($tgl)));
-			$query5 =  "INSERT INTO `jadwal` ( `id_user`, `kegiatan`, `tanggal_mulai`, `tanggal_selesai`, `status`, `id_sesi`, `id_lahan`) VALUES ( '1','$kegiatan','$tgl','$tgl2', 'belum', '$idbaru', '$lahan')";
+			$query5 =  "INSERT INTO `schedule` (`activities`, `date_start`, `date_start`, `status`, `id_session`, `id_pot`) VALUES ( '$activities','$tgl','$tgl2', 'belum', '$idbaru', '$lahan')";
 			$result1 = mysqli_query($koneksi,$query5); 
 			
-		} 
+		} }
+
+		$updateQuery = "UPDATE pot SET status = 'Filled' WHERE id_pot = '$lahan'";
+        mysqli_query($koneksi, $updateQuery);
 	};
-	$query =  "UPDATE lahan set status = 'produksi' where id_lahan='$lahan'";
-	$result = mysqli_query($koneksi,$query);
 
 }
 //tambah jadwal satuan
 if(isset($_POST['tambah'])) {
-	$query7 =  mysqli_query($koneksi,"SELECT * from sesi_tanam where id_lahan = '$idPilihan' and status='belum'");
-	$data5 = mysqli_fetch_array($query7);
-	$idlama = $data5["id_sesi"];
+	// Define query7 to fetch the latest id_sesi
+	$query7 = "SELECT id_session FROM planting_session ORDER BY id_session DESC LIMIT 1";
+    $result7 = mysqli_query($koneksi, $query7);
+    
+    if ($result7) {
+        $data5 = mysqli_fetch_array($result7);
+        $idlama = $data5["id_session"];
 
-	$user = $_POST['user'];
-	$kegiatan = $_POST['kegiatan'];
-	$start = $_POST['start'];
-	$end = $_POST['end'];
-	$lahan = $_POST['lahan'];
-	$query =  "INSERT INTO `jadwal` ( `id_user`, `kegiatan`, `tanggal_mulai`, `tanggal_selesai`, `status`, `id_sesi`, `id_lahan`) VALUES ( '$user','$kegiatan','$start','$end', 'belum', '$idlama', '$lahan')";
-	$result = mysqli_query($koneksi,$query); 
+        $activities = $_POST['activities'];
+        $start = $_POST['start'];
+        $end = $_POST['end'];
+        $lahan = $_POST['lahan'];
+        
+        $query = "INSERT INTO `schedule` (`activities`, `date_start`, `date_finish`, `status`, `id_session`, `id_pot`) VALUES ('$activities','$start','$end', 'yet', '$idlama', '$lahan')";
+        $result = mysqli_query($koneksi, $query);} 
 }
 if(isset($_POST['Update'])) {
 	$id2 = $_POST['idJadwal'];
 	$user = $_POST['user'];
-	$kegiatan = $_POST['title'];
+	$activities = $_POST['title'];
 	$start = $_POST['start'];
 	$end = $_POST['end'];
-	$query9 =  "UPDATE jadwal set kegiatan = '$kegiatan', tanggal_mulai= '$start', tanggal_selesai = '$end', id_user = '$user' WHERE `jadwal`.`id_jadwal` = '$id2'";
+	$query9 =  "UPDATE schedule set activities = '$activities', date_start= '$start', date_finish = '$end', id_user = '$user' WHERE `schedule`.`id_schedule` = '$id2'";
 	$result = mysqli_query($koneksi,$query9);
 }
 //hapus jadwal
 if(isset($_POST['hapus'])) {
 	$id = $_POST['idJadwal'];
-	$query =  "DELETE FROM `jadwal` WHERE id_jadwal = $id";
+	$query =  "DELETE FROM `schedule` WHERE id_schedule = $id";
 	$result = mysqli_query($koneksi,$query); 
 
 }
 //drag n drop
 if(isset($_POST['id'])) {
 	$id2 = $_POST['id'];
-	$kegiatan = $_POST['title'];
+	$activities = $_POST['title'];
 	$start = $_POST['start'];
 	$end = $_POST['end'];
-	$query =  "UPDATE jadwal set kegiatan = '$kegiatan', tanggal_mulai= '$start', tanggal_selesai = '$end' WHERE `jadwal`.`id_jadwal` = '$id2'";
+	$query =  "UPDATE schedule set activities = '$activities', date_start= '$start', date_finish = '$end' WHERE `jadwal`.`id_schedule` = '$id2'";
 	$result = mysqli_query($koneksi,$query);
 }
-$sql5 = "SELECT * FROM jadwal right JOIN lahan ON jadwal.id_lahan=lahan.id_lahan where lahan.id_lahan = '$idPilihan'";
+
+
+$sql5 = "SELECT * FROM schedule right JOIN pot ON schedule.id_pot=pot.id_pot where pot.id_pot = '$idPilihan'";
 $result8 = mysqli_query($koneksi,$sql5);
 $dataArr = array();
 if(mysqli_num_rows($result8)>0){ 
 while($data = mysqli_fetch_array($result8)){
-	$namalhn = $data['nama_lahan'];
+	$namalhn = $data['pot_name'];
 	$dataArr[] = array(
-		'id' => $data['id_jadwal'],
-		'karyawan'=> $data['id_user'],
-		'title' => $data['kegiatan'],
-		'start' => $data['tanggal_mulai'],
-		'end' => $data['tanggal_selesai'],
+		'id' => $data['id_schedule'],
+		'title' => $data['activities'],
+		'start' => $data['date_start'],
+		'end' => $data['date_finish'],
 	);
 }};
 if ($idPilihan){
 	$judul = $namalhn;
 } else{
-	$judul = "Pilih Lahan";
+	$judul = "Choose Pot";
 };
  ?>
 
@@ -110,23 +113,9 @@ if ($idPilihan){
 	<head>
 		<meta charset="utf-8" />
 		<title>Edifarm</title>
-		<link
-			rel="apple-touch-icon"
-			sizes="180x180"
-			href="vendors/images/logo_edifarm.png"
-		/>
-		<link
-			rel="icon"
-			type="image/png"
-			sizes="32x32"
-			href="vendors/images/logo_edifarm.png"
-		/>
-		<link
-			rel="icon"
-			type="image/png"
-			sizes="16x16"
-			href="vendors/images/logo_edifarm.png"
-		/>
+		<link rel="apple-touch-icon" sizes="180x180" href="vendors/images/SmartFarm-LOGO 1.png" />
+		<link rel="icon" type="image/png" sizes="32x32" href="vendors/images/SmartFarm-LOGO 1.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="vendors/images/SmartFarm-LOGO 1.png" />
 		<meta
 			name="viewport"
 			content="width=device-width, initial-scale=1, maximum-scale=1"
@@ -168,7 +157,7 @@ if ($idPilihan){
 						<div class="row">
 							<div class="col-md-6 col-sm-12">
 								<div class="title">
-									<h4>Jadwal</h4>
+									<h4>Schedule</h4>
 								</div>
 								<nav aria-label="breadcrumb" role="navigation">
 									<ol class="breadcrumb">
@@ -176,7 +165,7 @@ if ($idPilihan){
 											<a href="dashboard.php">Dashboard</a>
 										</li>
 										<li class="breadcrumb-item active" aria-current="page">
-											Jadwal
+											Schedule
 										</li>
 									</ol>
 								</nav>
@@ -193,13 +182,13 @@ if ($idPilihan){
 									</a>
 									<ul class="dropdown-menu dropdown-menu-right">
 									<?php 
-									$query1 = mysqli_query($koneksi,"SELECT * FROM lahan where status='produksi'");
+									$query1 = mysqli_query($koneksi,"SELECT * FROM pot where status='Filled'");
 									if(mysqli_num_rows($query1)>0){ 
 									?>
 									<?php
 										while($data1 = mysqli_fetch_array($query1)){
-											$namalahan1=$data1["nama_lahan"];
-											$idlahan1=$data1["id_lahan"];
+											$namalahan1=$data1["pot_name"];
+											$idlahan1=$data1["id_pot"];
 									?>		
 										<li><a class="dropdown-item" href="calendar.php?idlhn=<?=$idlahan1;?>"><?php echo $namalahan1 ?></a></li>
 									<?php  
@@ -225,43 +214,19 @@ if ($idPilihan){
 									<form action="calendar.php?idlhn=<?=$idPilihan;?>" method="POST">
 										<div class="modal-body">
 											<h4 class="text-blue h4 mb-10">Detail Jadwal</h4>
+										
+											
 											<div class="form-group">
-												<input hidden type="text" class="idJadwal form-control" name="idJadwal" id="user" />
-											</div>
-											<div class="form-group">
-												<label>Nama Karyawan</label>
-													<select class="idkaryawan custom-select col-12" name="user" required>
-													<?php 
-													if($idPilihan){
-														$query6 = mysqli_query($koneksi,"SELECT * FROM user where id_lahan = $idPilihan");
-														if(mysqli_num_rows($query6)>0){ 
-														?>
-														<?php
-															while($data3 = mysqli_fetch_array($query6)){
-																$namauser5=$data3["nama"];
-																$idlahan5=$data3["id_user"];
-														?>		
-															<option value="<?php echo $idlahan5 ?>"><?php echo $namauser5 ?></option>
-															<?php  
-															} 
-														}else{?>
-															<option disabled >Tidak ada karyawan di lahan ini</option><?php
-														}
-													}
-													?>
-													</select>
-											</div>
-											<div class="form-group">
-												<label>Kegiatan</label>
+												<label>activities</label>
 												<input type="text" class="title form-control" name="title" id="title" required/>
 											</div>
 											<div class="form-group">
-												<label>Mulai</label>
-												<input type="datetime" class="tanggalstr form-control datetime" name="start" id="kegiatan" value="" />
+												<label>Start Date</label>
+												<input type="datetime" class="tanggalstr form-control datetime" name="start" id="activities" value="" />
 											</div>
 											<div class="form-group">
-												<label>Selesai</label>
-												<input type="datetime" class="tanggalend form-control datetime" name="end" id="kegiatan" value="" />
+												<label>Finish</label>
+												<input type="datetime" class="tanggalend form-control datetime" name="end" id="activities" value="" />
 											</div>
 											<div class="form-group">
 												<input hidden type="text" class="form-control" readOnly name="lahan" id="user" value="<?php echo $idPilihan ?>" />
@@ -295,41 +260,19 @@ if ($idPilihan){
 								<div class="modal-content">
 									<form action="calendar.php?idlhn=<?=$idPilihan;?>" method="POST">
 										<div class="modal-body">
-											<h4 class="text-blue h4 mb-10">Tambah Detail Jadwal</h4>
+											<h4 class="text-blue h4 mb-10">Add New Schedule</h4>
+											
 											<div class="form-group">
-												<label>Nama Karyawan</label>
-													<select class="custom-select col-12" name="user" required>
-													<?php 
-													if($idPilihan){
-														$query6 = mysqli_query($koneksi,"SELECT * FROM user where id_lahan = $idPilihan");
-														if(mysqli_num_rows($query6)>0){ 
-														?>
-														<?php
-															while($data3 = mysqli_fetch_array($query6)){
-																$namauser=$data3["nama"];
-																$idlahan=$data3["id_user"];
-														?>		
-															<option value="<?php echo $idlahan ?>"><?php echo $namauser ?></option>
-															<?php  
-															} 
-														}else{?>
-															<option disabled >Tidak ada karyawan di lahan ini</option><?php
-														}
-													}
-													?>
-													</select>
+												<label>Activities</label>
+												<input type="text" class="form-control" name="activities" id="activities" required/>
 											</div>
 											<div class="form-group">
-												<label>Kegiatan</label>
-												<input type="text" class="form-control" name="kegiatan" id="kegiatan" required/>
+												<label>Start Date</label>
+												<input type="text" class="tanggalstr form-control" readOnly name="start" id="activities" value="" />
 											</div>
 											<div class="form-group">
-												<label>Mulai</label>
-												<input type="text" class="tanggalstr form-control" readOnly name="start" id="kegiatan" value="" />
-											</div>
-											<div class="form-group">
-												<label>Selesai</label>
-												<input type="text" class="tanggalend form-control" readOnly name="end" id="kegiatan" value="" />
+												<label>Finish Date</label>
+												<input type="text" class="tanggalend form-control" readOnly name="end" id="activities" value="" />
 											</div>
 											<div class="form-group">
 												<label></label>
@@ -338,14 +281,14 @@ if ($idPilihan){
 										</div>
 										<div class="modal-footer">
 											<button type="submit" class="btn btn-primary"  id="tombol_form" name="tambah">
-												Simpan
+												Save
 											</button>
 											<button
 												type="button"
 												class="btn btn-primary"
 												data-dismiss="modal"
 											>
-												Batal
+												Cancel
 											</button>
 										</div>
 									</form>
@@ -362,14 +305,14 @@ if ($idPilihan){
 		class="welcome-modal-btn"
 		data-toggle="modal" data-target="#exampleModal"
 			>
-			(+) Tambah
+			(+) Add
 		</button>
 
 		<div class="modal fade bs-example-modal-lg" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="exampleModalLabel">Sesi Tanam Baru</h5>
+						<h5 class="modal-title" id="exampleModalLabel">New Pot</h5>
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 						</button>
@@ -377,18 +320,18 @@ if ($idPilihan){
 					<div class="modal-body">
 						<form action="calendar.php?idlhn=<?=$idPilihan;?>" method="POST">
 							<div class="form-group row">
-								<label class="col-sm-12 col-md-2 col-form-label">Lahan</label>
+								<label class="col-sm-12 col-md-2 col-form-label">Pot</label>
 								<div class="col-sm-12 col-md-10 ">
-								<select class="form-control selectpicker" name="lahanPilih" title="Lahan yang tersedia" required>
+								<select class="form-control selectpicker" name="lahanPilih" title="Available Pot" required>
 									
 								<?php 
-								$query = mysqli_query($koneksi,"SELECT * FROM lahan where status = 'kosong'");
+								$query = mysqli_query($koneksi,"SELECT * FROM pot where status = 'Empty'");
 								if(mysqli_num_rows($query)>0){ 
 								?>
 								<?php
 									while($data2 = mysqli_fetch_array($query)){
-										$namalahan=$data2["nama_lahan"];
-										$idlahan2=$data2["id_lahan"];
+										$namalahan=$data2["pot_name"];
+										$idlahan2=$data2["id_pot"];
 								?>		
 									<option value="<?php echo $idlahan2 ?>"><?php echo $namalahan ?></option>
 									<?php  
@@ -399,18 +342,18 @@ if ($idPilihan){
 								</div>
 							</div>
 							<div class="form-group row">
-								<label class="col-sm-12 col-md-2 col-form-label">Janis Padi</label>
+								<label class="col-sm-12 col-md-2 col-form-label">Variety</label>
 								<div class="col-sm-12 col-md-10 ">
-								<select class="form-control selectpicker" name="padiPilih" title="Pilih jenis padi" required>
+								<select class="form-control selectpicker" name="padiPilih" title="Choose Variety" required>
 									
 								<?php 
-								$query2 = mysqli_query($koneksi,"SELECT * FROM jenis");
+								$query2 = mysqli_query($koneksi,"SELECT * FROM variety");
 								if(mysqli_num_rows($query2)>0){ 
 								?>
 								<?php
 									while($data1 = mysqli_fetch_array($query2)){
-										$namajenis=$data1["nama_jenis"];
-										$idjenis=$data1["id_jenis"];
+										$namajenis=$data1["name_variety"];
+										$idjenis=$data1["id_variety"];
 								?>		
 									<option value="<?php echo $idjenis ?>"><?php echo $namajenis ?></option>
 									<?php  
@@ -421,7 +364,7 @@ if ($idPilihan){
 								</div>
 							</div>
 							<div class="form-group row">
-								<label class="col-sm-12 col-md-2 col-form-label">Tgl. Mulai</label>
+								<label class="col-sm-12 col-md-2 col-form-label">Start Date</label>
 								<div class="col-sm-12 col-md-10">
 									<input
 										class="form-control date"
@@ -512,7 +455,7 @@ if ($idPilihan){
 			select: function(start, end, allDay){
 				var lahan = "<?php echo $idPilihan ?>";
 				if(lahan==""){
-					alert("Pilih Lahan terlebih dahulu!");
+					alert("Choose a New Pot First on add Button!");
 				}else{
 					var start =$.fullCalendar.formatDate(start, "Y-MM-DD HH:mm:ss");
 				var end =$.fullCalendar.formatDate(end, "Y-MM-DD HH:mm:ss");

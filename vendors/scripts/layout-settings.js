@@ -98,7 +98,7 @@
 
 		// Sidebar Background
 		var sidebar_dark = jQuery(".sidebar-dark");
-		var sidebar_light = jQuery(".sidebar-light");
+		var sidebar_light = jQuery(".sidebar-dark");
 
 		sidebar_dark.click(function () {
 			"use strict";
@@ -119,14 +119,14 @@
 			"use strict";
 			jQuery(this).addClass("active");
 			sidebar_dark.removeClass("active");
-			body.removeClass("sidebar-dark").addClass("sidebar-light");
+			body.removeClass("sidebar-dark").addClass("sidebar-dark");
 
 			//Store in local storage
-			setOptions("navigationBackground", "sidebar-light");
+			setOptions("navigationBackground", "sidebar-dark");
 		});
 
 		//Click for current options
-		if (currentOptions.navigationBackground === "sidebar-light") {
+		if (currentOptions.navigationBackground === "sidebar-dark") {
 			sidebar_light.trigger("click");
 		}
 

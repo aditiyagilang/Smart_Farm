@@ -1,6 +1,5 @@
 <?php
 include ('koneksi.php');
-require('auth.php');
 if(isset($_POST['submit'])) {
 	$username = $_POST['username'];
 	$nama = $_POST['nama'];
@@ -22,10 +21,10 @@ if(isset($_POST['submit'])) {
 
 if(isset($_POST['submit'])) {
 	$nama = $_POST['nama'];
-	$luas = $_POST['luas'];
+	
 	$des = $_POST['des'];
 	$tempat = $_POST['tempat'];
-	$query =  "INSERT INTO user VALUES ('02', '$nama','$luas','$deskripsi','$tempat')";
+	$query =  "INSERT INTO user VALUES ('02', '$nama','$description','$tempat')";
 	$result = mysqli_query($koneksi,$query);
 	
 }if ($idPilihan){
@@ -41,10 +40,10 @@ if(isset($_POST['submit'])) {
 <html>
 <head>
 		<meta charset="utf-8" />
-		<title>Laporan</title>
-		<link rel="apple-touch-icon" sizes="180x180" href="vendors/images/logo_edifarm.png" />
-		<link rel="icon" type="image/png" sizes="32x32" href="vendors/images/logo_edifarm.png" />
-		<link rel="icon" type="image/png" sizes="16x16" href="vendors/images/logo_edifarm.png" />
+		<title>Report</title>
+		<link rel="apple-touch-icon" sizes="180x180" href="vendors/images/SmartFarm-LOGO 1.png" />
+		<link rel="icon" type="image/png" sizes="32x32" href="vendors/images/SmartFarm-LOGO 1.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="vendors/images/SmartFarm-LOGO 1.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 		<link rel="stylesheet" type="text/css" href="vendors/styles/core.css" />
@@ -54,6 +53,8 @@ if(isset($_POST['submit'])) {
 		<link rel="stylesheet" type="text/css" href="vendors/styles/style.css" />
 	</head>
 	<body>
+
+	
 		<?php include 'header.php'; ?>
 		
 		<div class="right-sidebar">
@@ -69,7 +70,7 @@ if(isset($_POST['submit'])) {
 						<div class="row">
 							<div class="col-md-6 col-sm-12">
 								<div class="title">
-									<h4>Laporan</h4>
+									<h4>Report Data</h4>
 								</div>
 								<nav aria-label="breadcrumb" role="navigation">
 									<ol class="breadcrumb">
@@ -77,58 +78,14 @@ if(isset($_POST['submit'])) {
 											<a href="dashboard.php">Dashboard</a>
 										</li>
 										<li class="breadcrumb-item active" aria-current="page">
-											Laporan
+											Report
 										</li>
 									</ol>
 								</nav>
 							</div>
 						</div>
 					</div>
-					<!-- Laporan Karyawan Mulai -->
-					<div class="card-box mb-30">
-						<div class="pd-20">
-							<h4 class="text-blue h4">Laporan Karyawan</h4>
-						</div>
-						<div class="pb-20">
-							<table class="data-table-export table stripe hover nowrap">
-								<thead>
-									<tr>
-									<th class="table-plus datatable-nosort">Username</th>
-										<th>Nama</th>
-										<th>Jenis Kelamin</th>
-										<th>Alamat</th>
-										<th>No. HP</th>
-										<th>Tgl Lahir</th>
-										<th>email</th>
-										<th>Lahan</th>
-				
-									</tr>
-								</thead>
-								<tbody>
-								<?php
-									$query = mysqli_query($koneksi,"SELECT * FROM user INNER JOIN lahan on user.id_lahan=lahan.id_lahan where id_level = '2'");
-									if(mysqli_num_rows($query)>0){ ?>
-									<?php
-									while($data = mysqli_fetch_array($query)){
-								?>
-									<tr>
-									<td class="table-plus"><?php echo $data["username"];?></td>
-										<td><?php echo $data["nama"];?></td>
-										<td><?php echo $data["jenis_kelamin"];?></td>
-										<td><?php echo $data["alamat"];?></td>
-										<td><?php echo $data["no_hp"];?></td>
-										<td><?php echo $data["tanggal_lahir"];?></td>
-										<td><?php echo $data["email"];?></td>
-										<td><?php echo $data["nama_lahan"];?></td>
-									</tr>
-									<?php
-									}
-								}
-								?>
-								</tbody>
-							</table>
-						</div>
-					</div>
+
 					<!-- Laporan Karyawan Berhenti -->
 
 						<!-- Laporan Konsultasi Mulai -->
@@ -138,132 +95,102 @@ if(isset($_POST['submit'])) {
 					<!-- Laporan Lahan Mulai -->
 					<div class="card-box mb-30">
 						<div class="pd-20">
-							<h4 class="text-blue h4">Laporan Lahan</h4>
+							<h4 class="text-blue h4">Soil Humidity</h4>
 						</div>
 						<div class="pb-20">
 							<table class="data-table-export table stripe hover nowrap">
 								<thead>
 									<tr>
-										<th class="table-plus datatable-nosort">Nama Lahan</th>
-										<th>Luas Lahan</th>
-										<th>Tempat Lahan</th>
-										<th>Deskripsi</th>
+										<th class="table-plus datatable-nosort">Date</th>
+										<th>Pot</th>
+										<th>Description</th>
+										<th>Result</th>
 									</tr>
 								</thead>
 								<tbody>
 								<?php
-									$query = mysqli_query($koneksi,"SELECT nama_lahan, luas_lahan, tempat, deskripsi FROM lahan");
-									if(mysqli_num_rows($query)>0){ ?>	
-									<?php
-									while($data = mysqli_fetch_array($query)){
-								?>
-									<tr>
-									<td class="table-plus"><?php echo $data["nama_lahan"];?></td>
-										<td><?php echo $data["luas_lahan"];?></td>
-										<td><?php echo $data["tempat"];?></td>
-										<td><?php echo $data["deskripsi"];?></td>
-									</tr>
-									<?php
-									}
-								}
-								?>
+$queryLahan = mysqli_query($koneksi, "SELECT id_pot, pot_name, description FROM pot");
+if (mysqli_num_rows($queryLahan) > 0) {
+    while ($dataLahan = mysqli_fetch_array($queryLahan)) {
+        $idLahan = $dataLahan['id_pot'];
+        $namaLahan = $dataLahan['pot_name'];
+        $deskripsi = $dataLahan['description'];
+
+        // Retrieve session data for the current land (id_pot)
+        $querySesi = mysqli_query($koneksi, "SELECT date_start, status FROM planting_session WHERE id_pot = '$idLahan'");
+        if (mysqli_num_rows($querySesi) > 0) {
+            while ($dataSesi = mysqli_fetch_array($querySesi)) {
+                $tanggalStart = $dataSesi['date_start'];
+                $statusSesi = $dataSesi['status'];
+                ?>
+                <tr>
+                    <td class="table-plus"><?php echo $tanggalStart; ?></td>
+                    <td><?php echo $namaLahan; ?></td>
+                    <td><?php echo $deskripsi; ?></td>
+                </tr>
+                <?php
+            }
+        }
+    }
+}
+?>
+
 								</tbody>
 							</table>
 						</div>
 					</div>
 					<!-- Laporan Lahan Berhenti -->
 
-					<!-- Laporan konsultasi Mulai -->
 					<div class="card-box mb-30">
 						<div class="pd-20">
-							<h4 class="text-blue h4">Laporan Konsultasi</h4>
+							<h4 class="text-blue h4">Prediction</h4>
 						</div>
 						<div class="pb-20">
 							<table class="data-table-export table stripe hover nowrap">
 								<thead>
 									<tr>
-										<th class="table-plus datatable-nosort">Tanggal Konsultasi</th>
-										<th>Nama Karyawan</th>
-										<th>Nama Lahan</th>
-										<th>Keluhan</th>
+									<th class="table-plus datatable-nosort">Date</th>
+										<th>Pot</th>
+										<th>Description</th>
+										<th>Result</th>
 									</tr>
 								</thead>
 								<tbody>
-								<?php 
-								$query = mysqli_query($koneksi,"SELECT * FROM consul INNER JOIN user ON consul.id_user=user.id_user INNER JOIN lahan ON user.id_lahan = lahan.id_lahan WHERE consul.status='selesai'");
-								if(mysqli_num_rows($query)>0){
-								?>
 								<?php
-									while($data1 = mysqli_fetch_array($query)){
-										$tanggal=$data1["tanggal_consul"];
-										$nama_kar=$data1["nama"];
-										$nama_lahan=$data1["nama_lahan"];
-										$des=$data1["isi"];
-										
-								?>		
-								<tr >
-										<td><?php echo $data1["tanggal_consul"];?></td>
-										<td><?php echo $data1["nama"];?></td>
-										<td><?php echo $data1["nama_lahan"];?></td>
-										<td><?php echo $data1["isi"];?></td>
-									<?php
-									}};
+									$queryLahan = mysqli_query($koneksi, "SELECT id_pot, pot_name, description
+									 FROM pot");
+									if (mysqli_num_rows($queryLahan) > 0) {
+										while ($dataLahan = mysqli_fetch_array($queryLahan)) {
+											$idLahan = $dataLahan['id_pot'];
+											$namaLahan = $dataLahan['pot_name'];
+											$deskripsi = $dataLahan['description'];
+									
+											// Retrieve session data for the current land (id_pot)
+											$querySesi = mysqli_query($koneksi, "SELECT date_start, status FROM planting_session WHERE id_pot = '$idLahan'");
+											if (mysqli_num_rows($querySesi) > 0) {
+												while ($dataSesi = mysqli_fetch_array($querySesi)) {
+													$tanggalStart = $dataSesi['date_start'];
+													$statusSesi = $dataSesi['status'];
+													?>
+													<tr>
+														<td class="table-plus"><?php echo $tanggalStart; ?></td>
+														<td><?php echo $namaLahan; ?></td>
+														<td><?php echo $deskripsi; ?></td>
+													</tr>
+													<?php
+												}
+											}
+										}
+									}
 									?>
-										
 								</tbody>
 							</table>
 						</div>
 					</div>
-					<!-- Laporan Lahan Berhenti -->
 
-						<!-- Laporan kegiatan Mulai -->
-						<div class="card-box mb-30">
-						<div class="pd-20">
-							<h4 class="text-blue h4">Laporan Kegiatan</h4>
-						</div>
-						<div class="pb-20">
-							<table class="data-table-export table stripe hover nowrap">
-								<thead>
-									<tr>
-										<th class="table-plus datatable-nosort">Nama Karyawan</th>
-										<th>Nama Lahan</th>
-										<th>Sesi</th>
-										<th>Kegiatan</th>
-										<th>Tanggal Mulai</th>
-										<th>Tanggal Selesai</th>
-										
-									</tr>
-								</thead>
-								<tbody>
-								<?php 
-								$query = mysqli_query($koneksi,"SELECT * FROM jadwal INNER JOIN user ON jadwal.id_user=user.id_user INNER JOIN lahan ON jadwal.id_lahan = lahan.id_lahan WHERE jadwal.status='selesai'");
-								if(mysqli_num_rows($query)>0){
-								?>
-								<?php
-									while($data2 = mysqli_fetch_array($query)){
-										$nama_kar=$data2["nama"];
-										$nama_lahan=$data2["nama_lahan"];
-										$nama_sesi=$data2["id_sesi"];
-										$kegiatan=$data2["kegiatan"];
-										$tanggal1=$data2["tanggal_mulai"];
-										$tanggal2=$data2["tanggal_selesai"];
-										
-								?>		
-								<tr >
-										<td><?php echo $data2["nama"];?></td>
-										<td><?php echo $data2["nama_lahan"];?></td>
-										<td><?php echo $data2["id_sesi"];?></td>
-										<td><?php echo $data2["kegiatan"];?></td>
-										<td><?php echo $data2["tanggal_mulai"];?></td>
-										<td><?php echo $data2["tanggal_selesai"];?></td>
-									<?php
-									}};
-									?>
-										
-								</tbody>
-							</table>
-						</div>
 					</div>
+
+					
 					<!-- Laporan kegiatan Berhenti -->
 		<!-- welcome modal end -->
 		<script src="vendors/scripts/core.js"></script>

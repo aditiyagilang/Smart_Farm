@@ -1,30 +1,30 @@
 <?php 
 require('koneksi.php');
-require('auth.php');
 include('limitKata.php');
 $limit = new limit();
  // Check If form submitted, insert form data into users table.
  if(isset($_POST['submit'])) {
-	 $nama = $_POST['nama'];
-	 $luas = $_POST['luas'];
-	 $des = $_POST['des'];
-	 $tempat = $_POST['tempat'];
-	 $query =  "INSERT INTO `lahan` ( `nama_lahan`, `luas_lahan`, `tempat`, `deskripsi`, `status`) VALUES ( '$nama','$luas','$tempat','$des','kosong')";
-	 $result = mysqli_query($koneksi,$query);
- }
+    $nama = $_POST['nama'];
+    $des = $_POST['des'];
+    $query =  "INSERT INTO `pot` (`id_pot`, `pot_name`, `description`, `status`) VALUES (NULL, '$nama', '$des', 'Empty')";
+    $result = mysqli_query($koneksi, $query);
+
+    if ($result) {
+        // Redirect to a different page after successful data submission
+        header("Location: lahan.php"); // Replace index.php with the appropriate page
+        exit(); // Make sure to exit after sending the redirect header
+    }
+}
  if(isset($_POST['update'])) {
 	$id=$_POST['id'];
 	$nama = $_POST['nama'];
-	 $luas = $_POST['luas'];
 	 $des = $_POST['des'];
-	 $tempat = $_POST['tempat'];
-	
-	$query =  "UPDATE `lahan` SET `nama_lahan`='$nama',`luas_lahan`='$luas',`tempat`='$tempat',`deskripsi`='$des' WHERE id_lahan='$id'";
+	$query =  "UPDATE `pot` SET `pot_name`='$nama',`description`='$des' WHERE id_pot='$id'";
 	$result = mysqli_query($koneksi,$query);
 }
 if(isset($_POST['delete'])){
 	$id=$_POST['id'];
-	$query =  "DELETE FROM lahan WHERE id_lahan='$id'";
+	$query =  "DELETE FROM pot WHERE id_pot='$id'";
 	$result = mysqli_query($koneksi,$query);
 }
 
@@ -33,10 +33,10 @@ if(isset($_POST['delete'])){
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>Lahan</title>
-		<link rel="apple-touch-icon" sizes="180x180" href="vendors/images/logo_edifarm.png" />
-		<link rel="icon" type="image/png" sizes="32x32" href="vendors/images/logo_edifarm.png" />
-		<link rel="icon" type="image/png" sizes="16x16" href="vendors/images/logo_edifarm.png" />
+		<title>Pot</title>
+		<link rel="apple-touch-icon" sizes="180x180" href="vendors/images/SmartFarm-LOGO 1.png" />
+		<link rel="icon" type="image/png" sizes="32x32" href="vendors/images/SmartFarm-LOGO 1.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="vendors/images/SmartFarm-LOGO 1.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 		<link rel="stylesheet" type="text/css" href="vendors/styles/core.css" />
@@ -60,7 +60,7 @@ if(isset($_POST['delete'])){
 						<div class="row">
 							<div class="col-md-12 col-sm-12">
 								<div class="title">
-									<h4>Lahan</h4>
+									<h4>Pot</h4>
 								</div>
 								<nav aria-label="breadcrumb" role="navigation">
 									<ol class="breadcrumb">
@@ -68,7 +68,7 @@ if(isset($_POST['delete'])){
 											<a href="dashboard.php">Dashboard</a>
 										</li>
 										<li class="breadcrumb-item active" aria-current="page">
-											Lahan
+											Pot
 										</li>
 									</ol>
 								</nav>
@@ -77,12 +77,12 @@ if(isset($_POST['delete'])){
 					</div>
 					<div class="row clearfix">
 						<?php 
-						$query = "SELECT * FROM lahan";
+						$query = "SELECT * FROM pot";
 						$result = mysqli_query($koneksi,$query);
 						while($row= $row = mysqli_fetch_array($result)){
-							$id=$row["id_lahan"];
+							$id=$row["id_pot"];
 							$status=$row["status"];
-							$des=$row['deskripsi'];
+							$des=$row['description'];
 						?>
 						<div class="col-lg-3 col-md-6 col-sm-12 mb-30">
 							<div class="card card-box text-center">
@@ -91,14 +91,14 @@ if(isset($_POST['delete'])){
 									
 								</div>
 								<div class="card-body">
-									<h5 class="card-title weight-500 text-left"><?php echo $row["nama_lahan"];?></h5>
+									<h5 class="card-title weight-500 text-left"><?php echo $row["pot_name"];?></h5>
 									<p class="card-text text-left"><?= $limit->limit_kata($des,5) ;?></p>
 									<p class="card-text text-left"><?= $status?></p>
 									<div>
-										<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#detail<?= $row["id_lahan"];?>" >Detail</a>
+										<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#detail<?= $row["id_pot"];?>" >Detail</a>
 										<div
 											class="modal fade bs-example-modal-lg"
-											id="detail<?php echo $row["id_lahan"];?>"
+											id="detail<?php echo $row["id_pot"];?>"
 											tabindex="-1"
 											role="dialog"
 											aria-labelledby="myLargeModalLabel"
@@ -108,7 +108,7 @@ if(isset($_POST['delete'])){
 												<div class="modal-content">
 													<div class="modal-header">
 														<h4 class="modal-title" id="myLargeModalLabel">
-														<?= $row["nama_lahan"];?>
+														<?= $row["pot_name"];?>
 														</h4>
 														<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
 															×
@@ -118,40 +118,23 @@ if(isset($_POST['delete'])){
 														<form action="lahan.php" method="POST">
 															<input hidden class="form-control" value="<?= $id?>" type="text" name="id">
 															<div class="form-group row">
-																<label class="col-sm-12 col-md-2 col-form-label" for="des">Nama Lahan</label>
+																<label class="col-sm-12 col-md-2 col-form-label" for="des">Pot</label>
 																<div class="col-sm-12 col-md-10">
-																	<input class="form-control" value="<?= $row["nama_lahan"];?>" type="text" name="nama">
+																	<input class="form-control" value="<?= $row["pot_name"];?>" type="text" name="nama">
 																</div>
 															</div>									
 															
 															<div class="form-group row">
-																<label class="col-sm-12 col-md-2 col-form-label" for="des">Tempat</label>
+																<label class="col-sm-12 col-md-2 col-form-label" for="des">Description</label>
 																<div class="col-sm-12 col-md-10">
-																	<input class="form-control" value="<?= $row["tempat"];?>" type="text" name="tempat">
-																</div>
-															</div>	
-															<div class="form-group row">
-																<label class="col-sm-12 col-md-2 col-form-label" for="des">Deskripsi</label>
-																<div class="col-sm-12 col-md-10">
-																	<input class="form-control" value="<?= $row["deskripsi"];?>" type="text" name="des">
-																</div>
-															</div>	
-															<div class="form-group row">
-																<label class="col-sm-12 col-md-2 col-form-label" for="des">Status</label>
-																<div class="col-sm-12 col-md-10">
-																	<input disabled class="form-control" value="<?= $status?>" type="text" name="tempat">
-																</div>
-															</div>	
-															<div class="form-group row">
-																<label class="col-sm-12 col-md-2 col-form-label" for="des">Luas Lahan</label>
-																<div class="col-sm-12 col-md-10">
-																	<input class="form-control" value="<?= $row["luas_lahan"];?>" type="text" name="luas" onkeypress="return inputAngka(event)">
+																	<input class="form-control" value="<?= $row["description"];?>" type="text" name="des">
 																</div>
 															</div>	
 															
+															
 														</div>
 														<div class="modal-footer">
-															<input type="submit" name="delete" class="btn btn-primary" value="Delete" onclick="return confirm('Yakin ingin hapus data?')">	
+															<input type="submit" name="delete" class="btn btn-primary" value="Delete" onclick="return confirm('Sure, Want to Delete Data?')">	
 															<button type="button" class="btn btn-secondary" data-dismiss="modal" alt="add-modal-kar">Close</button>
 															<input type="submit" name="update" class="btn btn-primary" value="Update" onclick= "">
 														</div>
@@ -171,7 +154,7 @@ if(isset($_POST['delete'])){
 			</div>
 		</div>		
 		<div class="add-modal-kar">
-			<button href="#" class="welcome-modal-btn" data-toggle="modal" data-target="#tambahlahan">(+) Tambah</button>
+			<button href="#" class="welcome-modal-btn" data-toggle="modal" data-target="#tambahlahan">(+) Add</button>
 		</div>
 		
 		<div class="modal fade bs-example-modal-lg"
@@ -183,35 +166,24 @@ if(isset($_POST['delete'])){
 			<div class="modal-dialog modal-lg modal-dialog-centered">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h4 class="modal-title" id="myLargeModalLabel">Tambah Lahan</h4>
+						<h4 class="modal-title" id="myLargeModalLabel">Add Pot</h4>
 						<button type="button" class="close" data-dismiss="modal" aria-hidden="true" alt="add-modal-kar">x</button>
 					</div>
 					<div class="modal-body">						
 						<form action="lahan.php" method="POST">
 							<div class="form-group row">
-								<label class="col-sm-12 col-md-2 col-form-label" for="nama">Nama Lahan</label>
+								<label class="col-sm-12 col-md-2 col-form-label" for="nama">Pot Name</label>
 								<div class="col-sm-12 col-md-10">
-									<input class="form-control" type="nama" placeholder="Lahan" name="nama" required>
+									<input class="form-control" type="nama" placeholder="Pot 1, Pot 2, Pot 3" name="nama" required>
 								</div>
 							</div>
 							<div class="form-group row">
-								<label class="col-sm-12 col-md-2 col-form-label" for="des">Deskripsi</label>
+								<label class="col-sm-12 col-md-2 col-form-label" for="des">Description</label>
 								<div class="col-sm-12 col-md-10">
-									<input class="form-control" placeholder="Dataran tinggi" type="des" name="des" required>
+									<input class="form-control" placeholder="The Soil Moisture of pot 1 have good soil" type="des" name="des" required>
 								</div>
 							</div>
-							<div class="form-group row">
-								<label class="col-sm-12 col-md-2 col-form-label" for="tempat">Tempat</label>
-								<div class="col-sm-12 col-md-10">
-									<input class="form-control" placeholder="Jember" type="tempat" name="tempat" required>
-								</div>
-							</div>
-							<div class="form-group row">
-								<label class="col-sm-12 col-md-2 col-form-label" for="luas">Luas Lahan</label>
-								<div class="col-sm-12 col-md-10" >
-									<input class="form-control" id="luas" type="text" value="0" name="luas" onkeypress="return inputAngka(event)"/>
-								</div>
-							</div>
+						
 							</div>
 								<div class="modal-footer">
 									<button
@@ -219,9 +191,9 @@ if(isset($_POST['delete'])){
 										class="btn btn-secondary"
 										data-dismiss="modal"
 										alt="add-modal-kar"
-									>Batal
+									>Cancel
 									</button>
-									<input type="submit" name="submit" class="btn btn-primary" value="Simpan" id="sa-success">
+									<input type="submit" name="submit" class="btn btn-primary" value="Save" id="sa-success">
 								</div>
 							</div>
 						</form>

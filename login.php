@@ -1,4 +1,4 @@
-<?php
+  <?php
 require('koneksi.php');
 session_start();
 if(isset($_GET['error'])){
